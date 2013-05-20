@@ -15,7 +15,7 @@ if [[ $OSTYPE = darwin* ]]; then
 else
     QT_CFG+=' -system-freetype' # Freetype for text rendering
     QT_CFG+=' -fontconfig'      # Fontconfig for better font matching
-    QT_CFG+=' -qpa'             # X11-less with QPA (aka Lighthouse)
+    #QT_CFG+=' -qpa'             # X11-less with QPA (aka Lighthouse)
 fi
 
 QT_CFG+=' -release'             # Build only for release (no debugging support)

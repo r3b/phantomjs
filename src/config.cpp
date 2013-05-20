@@ -54,6 +54,7 @@ static const struct QCommandLineConfigEntry flags[] =
     { QCommandLine::Option, '\0', "disk-cache", "Enables disk cache: 'true' or 'false' (default)", QCommandLine::Optional },
     { QCommandLine::Option, '\0', "ignore-ssl-errors", "Ignores SSL errors (expired/self-signed certificate errors): 'true' or 'false' (default)", QCommandLine::Optional },
     { QCommandLine::Option, '\0', "load-images", "Loads all inlined images: 'true' (default) or 'false'", QCommandLine::Optional },
+    { QCommandLine::Option, '\0', "load-plugins", "Loads all plugins: 'true' (default) or 'false'", QCommandLine::Optional },
     { QCommandLine::Option, '\0', "local-storage-path", "Specifies the location for offline local storage", QCommandLine::Optional },
     { QCommandLine::Option, '\0', "local-storage-quota", "Sets the maximum size of the offline local storage (in KB)", QCommandLine::Optional },
     { QCommandLine::Option, '\0', "local-to-remote-url-access", "Allows local content to access remote URL: 'true' or 'false' (default)", QCommandLine::Optional },
@@ -184,6 +185,15 @@ bool Config::autoLoadImages() const
 void Config::setAutoLoadImages(const bool value)
 {
     m_autoLoadImages = value;
+}
+bool Config::pluginsEnabled() const
+{
+    return m_pluginsEnabled;
+}
+
+void Config::setPluginsEnabled(const bool value)
+{
+    m_pluginsEnabled = value;
 }
 
 QString Config::cookiesFile() const
@@ -615,6 +625,7 @@ void Config::handleOption(const QString &option, const QVariant &value)
     booleanFlags << "disk-cache";
     booleanFlags << "ignore-ssl-errors";
     booleanFlags << "load-images";
+    booleanFlags << "load-plugins";
     booleanFlags << "local-to-remote-url-access";
     booleanFlags << "remote-debugger-autorun";
     booleanFlags << "web-security";
@@ -649,7 +660,9 @@ void Config::handleOption(const QString &option, const QVariant &value)
     if (option == "load-images") {
         setAutoLoadImages(boolValue);
     }
-
+    if (option == "load-plugins=yes") {
+            setPluginsEnabled(boolValue);
+    }
     if (option == "local-storage-path") {
         setOfflineStoragePath(value.toString());
     }
