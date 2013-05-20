@@ -15,7 +15,7 @@ if [[ $OSTYPE = darwin* ]]; then
 else
     QT_CFG+=' -system-freetype' # Freetype for text rendering
     QT_CFG+=' -fontconfig'      # Fontconfig for better font matching
-    QT_CFG+=' -qpa'             # X11-less with QPA (aka Lighthouse)
+#    QT_CFG+=' -qpa'             # X11-less with QPA (aka Lighthouse)
 fi
 
 QT_CFG+=' -release'             # Build only for release (no debugging support)
@@ -47,16 +47,16 @@ QT_CFG+=' -no-svg'
 QT_CFG+=' -no-xmlpatterns'
 
 # Unnecessary Qt features
-QT_CFG+=' -D QT_NO_GRAPHICSVIEW'
-QT_CFG+=' -D QT_NO_GRAPHICSEFFECT'
+#QT_CFG+=' -D QT_NO_GRAPHICSVIEW'
+#QT_CFG+=' -D QT_NO_GRAPHICSEFFECT'
 
 # Sets the default graphics system to the raster engine
 QT_CFG+=' -graphicssystem raster'
 
 # Unix
 QT_CFG+=' -no-dbus'             # Disable D-Bus feature
-QT_CFG+=' -no-glib'             # No need for Glib integration
-QT_CFG+=' -no-gstreamer'        # Turn off GStreamer support
+#QT_CFG+=' -no-glib'             # No need for Glib integration
+#QT_CFG+=' -no-gstreamer'        # Turn off GStreamer support
 QT_CFG+=' -no-gtkstyle'         # Disable theming integration with Gtk+
 QT_CFG+=' -no-cups'             # Disable CUPs support
 QT_CFG+=' -no-sm'

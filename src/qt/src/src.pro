@@ -23,6 +23,7 @@ contains(QT_CONFIG, webkit)  {
     SRC_SUBDIRS += src_webkit
 }
 !contains(QT_CONFIG, no-gui):contains(QT_CONFIG, scripttools): SRC_SUBDIRS += src_scripttools
+#SRC_SUBDIRS += src_plugins
 contains(QT_CONFIG, declarative): SRC_SUBDIRS += src_imports
 
 # s60installs need to be at the end, because projects.pro does an ordered build,
