@@ -1,9 +1,5 @@
 # Setting up features (enabled/disabled)
 
-CONFIG(minimal) {
-    #DEFINES += ENABLE_NETSCAPE_PLUGIN_API=1
-}
-
 CONFIG(production) {
     DEFINES += ENABLE_XSLT=0
     DEFINES += ENABLE_WEB_TIMING=0
@@ -98,7 +94,7 @@ contains(DEFINES, ENABLE_SINGLE_THREADED=1) {
 # Tiled Backing Store support
 !contains(DEFINES, ENABLE_TILED_BACKING_STORE=.): DEFINES += ENABLE_TILED_BACKING_STORE=1
 
-# Always disable NPAPI
+# Always ENABLE NPAPI!
 DEFINES += ENABLE_NETSCAPE_PLUGIN_API=1
 
 # Nescape plugins support (NPAPI)

@@ -1,0 +1,14 @@
+prefix=/usr
+exec_prefix=${prefix}
+libdir=${prefix}/lib/x86_64-linux-gnu
+includedir=${prefix}/include/qt4/QtWebKit
+qt_config=include_source_dir lex yacc uic resources qt release incremental link_prl gdb_dwarf_index def_files_disabled exceptions no_mocdepend release stl qt_no_framework building-libs depend_includepath standalone_package depend_includepath include_webinspector building-libs standalone_package depend_includepath include_webinspector production staticlib depend_includepath hide_symbols bsymbolic_functions building-libs depend_includepath standalone_package depend_includepath include_webinspector production x11 link_pkgconfig production hide_symbols staticlib production create_pc create_prl static staticlib x11lib x11inc moc thread
+
+Name: Qtwebkit
+Description: Qtwebkit Library
+Version: 4.9.3
+Libs: -L${libdir} -lQtWebKit 
+Libs.private: -L/usr/X11R6/lib64 -L/usr/lib/x86_64-linux-gnu  -lsqlite3 -lXrender -lQtGui -lQtNetwork -lQtCore -lpthread -lXext -lX11 -lm  
+Cflags:  -I${includedir}
+Requires: QtCore QtGui QtNetwork
+
