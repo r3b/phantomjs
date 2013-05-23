@@ -660,7 +660,7 @@ void Config::handleOption(const QString &option, const QVariant &value)
     if (option == "load-images") {
         setAutoLoadImages(boolValue);
     }
-    if (option == "load-plugins=yes") {
+    if (option == "load-plugins") {
             setPluginsEnabled(boolValue);
     }
     if (option == "local-storage-path") {
