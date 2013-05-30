@@ -1,150 +1,91 @@
-<!doctype html>
-<!--[if lt IE 7]> <html class="no-js ie6 oldie" lang="en"> <![endif]-->
-<!--[if IE 7]>    <html class="no-js ie7 oldie" lang="en"> <![endif]-->
-<!--[if IE 8]>    <html class="no-js ie8 oldie" lang="en"> <![endif]-->
-<!--[if gt IE 8]><!--> <html class="no-js" lang="en"> <!--<![endif]-->
-<head>
-    <meta charset="utf-8"> 
-    <title>PhantomJS: Headless WebKit with JavaScript API</title>
-    <meta name="description" content="">
-    <meta name="author" content="">
-    <meta name="viewport" content="width=device-width,initial-scale=1">
-    <link href='http://fonts.googleapis.com/css?family=Droid+Sans:400,700' rel='stylesheet' type='text/css'>
-    <link rel="stylesheet" href="screen.min.css">
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset='utf-8'>
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <meta name="viewport" content="width=640" />
+
+    <link rel="stylesheet" href="stylesheets/core.css" media="screen"/>
+    <link rel="stylesheet" href="stylesheets/mobile.css" media="handheld, only screen and (max-device-width:640px)"/>
+    <link rel="stylesheet" href="stylesheets/pygment_trac.css"/>
+
+    <script type="text/javascript" src="javascripts/modernizr.js"></script>
+    <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
+    <script type="text/javascript" src="javascripts/headsmart.min.js"></script>
     <script type="text/javascript">
-    var _gaq = _gaq || [];
-    _gaq.push(['_setAccount', 'UA-21665893-1']);
-    _gaq.push(['_trackPageview']);
-    (function() {
-    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
-    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
-    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
-    })();
+      $(document).ready(function () {
+        $('#main_content').headsmart()
+      })
     </script>
-</head>
+    <title>Phantomjs (+Plugins) by r3b</title>
+  </head>
 
-<body>
-<div id="intro">
-    <div id="header" class="container_12">
-        <a href="http://www.phantomjs.org/" class="grid_4 alpha"><img src="images/phantomjs-logo.png" alt="PhantomJS" id="logo" width="240" height="80"></a>
-        <ul id="nav" class="grid_8 omega">
-            <li><a href="https://github.com/ariya/phantomjs">Source Code</a></li>
-            <li><a href="https://github.com/ariya/phantomjs/wiki">Documentation</a></li>
-            <li><a href="https://github.com/ariya/phantomjs/wiki/API-Reference">API</a></li>
-            <li><a href="https://github.com/ariya/phantomjs/wiki/Examples">Examples</a></li>
-            <li><a href="faq.html">FAQ</a></li>
-        </ul>
+  <body>
+    <a id="forkme_banner" href="https://github.com/r3b/phantomjs">View on GitHub</a>
+    <div class="shell">
+
+      <header>
+        <span class="ribbon-outer">
+          <span class="ribbon-inner">
+            <h1>Phantomjs (+Plugins)</h1>
+            <h2>Scriptable Headless WebKit. With the plugins re-enabled.</h2>
+          </span>
+          <span class="left-tail"></span>
+          <span class="right-tail"></span>
+        </span>
+      </header>
+
+      <section id="downloads">
+        <span class="inner">
+          <a href="https://github.com/r3b/phantomjs/zipball/master" class="zip"><em>download</em> .ZIP</a><a href="https://github.com/r3b/phantomjs/tarball/master" class="tgz"><em>download</em> .TGZ</a>
+        </span>
+      </section>
+
+
+      <span class="banner-fix"></span>
+
+
+      <section id="main_content">
+        <h3>
+<a name="phantomjs-plugins" class="anchor" href="#phantomjs-plugins"><span class="octicon octicon-link"></span></a>Phantomjs +Plugins</h3>
+
+<p>This is a fork of the phantomjs project with plugin support added back in. That's it. Enjoy!</p>
+
+<h3>
+<a name="additional-dependencies" class="anchor" href="#additional-dependencies"><span class="octicon octicon-link"></span></a>Additional Dependencies</h3>
+
+<p>In addition to the main branch dependencies, you're going to need:
+*libglib2.0-dev
+*libx11-dev
+*libxext-dev
+*libfreetype6-dev
+*libxcursor-dev
+*libxrandr-dev
+*libxv-dev
+*libxi-dev
+*libgstreamermm-0.10-dev
+*xvfb (at runtime)</p>
+
+<h3>
+<a name="authors-and-contributors" class="anchor" href="#authors-and-contributors"><span class="octicon octicon-link"></span></a>Authors and Contributors</h3>
+
+<p>This particular fork is maintained by Ryan Bridges (<a href="https://github.com/r3b" class="user-mention">@r3b</a>). The goal is to stay up-to-date with <a href="https://github.com/ariya" class="user-mention">@ariya</a>'s main project while keeping plugin support.</p>
+      </section>
+
+      <footer>
+        <span class="ribbon-outer">
+          <span class="ribbon-inner">
+            <p>this project by <a href="https://github.com/r3b">r3b</a> can be found on <a href="https://github.com/r3b/phantomjs">GitHub</a></p>
+          </span>
+          <span class="left-tail"></span>
+          <span class="right-tail"></span>
+        </span>
+        <p>Generated with <a href="http://pages.github.com">GitHub Pages</a> using Merlot</p>
+        <span class="octocat"></span>
+      </footer>
+
     </div>
+
     
-    <div id="introduction" class="container_12">
-        <div class="grid_7 alpha">
-            <h1>
-                Full web stack<br>
-                No browser required
-            </h1>
-            <p class="explanation">
-                PhantomJS is a headless WebKit scriptable with a JavaScript API.
-                It has <strong>fast</strong> and <strong>native</strong> support for various web standards: 
-                DOM handling, CSS selector, JSON, Canvas, and SVG.<br></a>
-            </p>
-            <p class="action">
-                <a href="download.html" id="download">Download <span class="version">v1.9</span></a>
-                <a href="https://github.com/ariya/phantomjs/wiki/Quick-Start">Get started</a>
-            </p>
-        </div>
-        <div id="intro-example" class="grid_5 omega">
-            <pre class="solarized">
-<strong>Simple Javascript example</strong>
-
-<span class="object">console</span>.<span class="function">log</span>(<span class="literal">'Loading a web page'</span>);
-var <span class="object">page</span> = require(<span class="literal">'webpage'</span>).<span class="function">create</span>();
-var <span class="object">url</span> = <span class="literal">'http://www.phantomjs.org/'</span>;
-<span class="object">page</span>.<span class="function">open</span>(url, <span class="function">function</span> (status) {
-    <span class="comment">//Page is loaded!</span>
-    <span class="object">phantom</span>.<span class="function">exit</span>();
-});</pre>
-        </div>
-    </div>
-</div>
-
-<div id="community">
-    <h2>Community:</h2>
-    <ul>
-        <li>
-            <a href="release-1.9.html" id="link-release">Read the release notes</a>
-        </li>
-        <li>
-            <a href="https://groups.google.com/forum/#!forum/phantomjs" id="link-ml">Join the mailing list</a>
-        </li>
-        <li>
-            <a href="https://github.com/ariya/phantomjs/issues" id="link-bugs">Report bugs</a>
-        </li>
-    </ul>
-</div>
-
-<div id="description" class="container_12">
-    <h2>PhantomJS is an optimal solution for</h2>
-    <div id="feature-01" class="feature grid_3 alpha">
-        <h3>Headless Website Testing</h3>
-        <div>
-            <p>
-                Run functional tests with frameworks such as Jasmine, QUnit, Mocha, Capybara, WebDriver, and many others.
-                <a href="https://github.com/ariya/phantomjs/wiki/Headless-Testing">Learn more</a>
-            </p>
-        </div>
-    </div>
-    <div id="feature-02" class="feature grid_3">
-        <h3>Screen Capture</h3>
-        <div>
-            <p>
-                Programmatically capture web contents, including SVG and Canvas.
-                Create web site screenshots with thumbnail preview.
-                <a href="https://github.com/ariya/phantomjs/wiki/Screen-Capture">Learn more</a>
-            </p>
-        </div>
-    </div>
-    <div id="feature-03" class="feature grid_3">
-        <h3>Page Automation</h3>
-        <div>
-            <p>
-                Access and manipulate webpages
-                with the standard DOM API, or with
-                usual libraries like jQuery.
-                <br>
-                <a href="https://github.com/ariya/phantomjs/wiki/Page-Automation">Learn more</a>
-            </p>
-        </div>
-    </div>
-    <div id="feature-04" class="feature grid_3 omega">
-        <h3>Network Monitoring</h3>
-        <div>
-            <p>
-                Monitor page loading and export as standard HAR files. Automate performance analysis using YSlow and Jenkins.
-                <a href="https://github.com/ariya/phantomjs/wiki/Network-Monitoring">Learn more</a>
-            </p>
-        </div>
-    </div>
-    <div id="feature-end" class="grid_12">
-        <p>
-        PhantomJS is used in the test workflow of various open-source projects:<br/>
-        <a href="http://twitter.github.com/bootstrap/">Bootstrap</a>,
-        <a href="http://codemirror.net/">CodeMirror</a>,
-        <a href="http://emberjs.com/">Ember.js</a>,
-        <a href="http://lesscss.org/">Less.js</a>,
-        <a href="http://modernizr.com/">Modernizr</a>,
-        <a href="http://yuilibrary.com/projects/yui3/">YUI3</a>,
-        and <a href="https://github.com/ariya/phantomjs/wiki/Users">many more</a>.
-        </p>
-    </div>
-</div>
-
-<div id="footer">
-    <div id="footer-content" class="container_12">
-        <p>
-            &copy; Copyright 2010-2013 <a href="http://twitter.com/AriyaHidayat">Ariya Hidayat</a> &mdash; Website design by <a href="http://svay.com/">Maurice Svay</a>
-        </p>
-    </div>
-</div>
-<a href="https://github.com/ariya/phantomjs/"><img style="position: absolute; top: 0; left: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_left_white_ffffff.png" alt="Fork me on GitHub"></a>
-</body>
+  </body>
 </html>
