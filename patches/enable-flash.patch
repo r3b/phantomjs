@@ -1,0 +1,320 @@
+From 1830fb6ba390ab7ece595825c89eced65b347abf Mon Sep 17 00:00:00 2001
+From: ryan bridges <ryan.bridges@turner.com>
+Date: Sun, 19 May 2013 22:18:30 -0400
+Subject: [PATCH 1/5] re-enabled plugin options
+
+---
+ src/config.cpp                                         |   15 ++++++++++++++-
+ src/config.h                                           |    5 +++++
+ src/qt/preconfig.sh                                    |   10 +++++-----
+ src/qt/src/3rdparty/webkit/Source/WebCore/features.pri |    4 ++--
+ src/qt/src/src.pro                                     |    1 +
+ tools/preconfig.sh                                     |    2 +-
+ 6 files changed, 28 insertions(+), 9 deletions(-)
+
+diff --git a/src/config.cpp b/src/config.cpp
+index fa2f751..724ba1c 100644
+--- a/src/config.cpp
++++ b/src/config.cpp
+@@ -54,6 +54,7 @@ static const struct QCommandLineConfigEntry flags[] =
+     { QCommandLine::Option, '\0', "disk-cache", "Enables disk cache: 'true' or 'false' (default)", QCommandLine::Optional },
+     { QCommandLine::Option, '\0', "ignore-ssl-errors", "Ignores SSL errors (expired/self-signed certificate errors): 'true' or 'false' (default)", QCommandLine::Optional },
+     { QCommandLine::Option, '\0', "load-images", "Loads all inlined images: 'true' (default) or 'false'", QCommandLine::Optional },
++    { QCommandLine::Option, '\0', "load-plugins", "Loads all plugins: 'true' (default) or 'false'", QCommandLine::Optional },
+     { QCommandLine::Option, '\0', "local-storage-path", "Specifies the location for offline local storage", QCommandLine::Optional },
+     { QCommandLine::Option, '\0', "local-storage-quota", "Sets the maximum size of the offline local storage (in KB)", QCommandLine::Optional },
+     { QCommandLine::Option, '\0', "local-to-remote-url-access", "Allows local content to access remote URL: 'true' or 'false' (default)", QCommandLine::Optional },
+@@ -185,6 +186,15 @@ void Config::setAutoLoadImages(const bool value)
+ {
+     m_autoLoadImages = value;
+ }
++bool Config::pluginsEnabled() const
++{
++    return m_pluginsEnabled;
++}
++
++void Config::setPluginsEnabled(const bool value)
++{
++    m_pluginsEnabled = value;
++}
+ 
+ QString Config::cookiesFile() const
+ {
+@@ -607,6 +617,7 @@ void Config::handleOption(const QString &option, const QVariant &value)
+     booleanFlags << "disk-cache";
+     booleanFlags << "ignore-ssl-errors";
+     booleanFlags << "load-images";
++    booleanFlags << "load-plugins";
+     booleanFlags << "local-to-remote-url-access";
+     booleanFlags << "remote-debugger-autorun";
+     booleanFlags << "web-security";
+@@ -641,7 +652,9 @@ void Config::handleOption(const QString &option, const QVariant &value)
+     if (option == "load-images") {
+         setAutoLoadImages(boolValue);
+     }
+-
++    if (option == "load-plugins=yes") {
++            setPluginsEnabled(boolValue);
++    }
+     if (option == "local-storage-path") {
+         setOfflineStoragePath(value.toString());
+     }
+diff --git a/src/config.h b/src/config.h
+index ba0bea8..6b30ea7 100644
+--- a/src/config.h
++++ b/src/config.h
+@@ -47,6 +47,7 @@ class Config: public QObject
+     Q_PROPERTY(bool ignoreSslErrors READ ignoreSslErrors WRITE setIgnoreSslErrors)
+     Q_PROPERTY(bool localToRemoteUrlAccessEnabled READ localToRemoteUrlAccessEnabled WRITE setLocalToRemoteUrlAccessEnabled)
+     Q_PROPERTY(QString outputEncoding READ outputEncoding WRITE setOutputEncoding)
++    Q_PROPERTY(bool pluginsEnabled READ pluginsEnabled WRITE setPluginsEnabled)
+     Q_PROPERTY(QString proxyType READ proxyType WRITE setProxyType)
+     Q_PROPERTY(QString proxy READ proxy WRITE setProxy)
+     Q_PROPERTY(QString proxyAuth READ proxyAuth WRITE setProxyAuth)
+@@ -100,6 +101,9 @@ public:
+     QString outputEncoding() const;
+     void setOutputEncoding(const QString &value);
+ 
++    bool pluginsEnabled() const;
++    void setPluginsEnabled(const bool value);
++
+     QString proxyType() const;
+     void setProxyType(const QString value);
+ 
+@@ -196,6 +200,7 @@ private:
+     bool m_ignoreSslErrors;
+     bool m_localToRemoteUrlAccessEnabled;
+     QString m_outputEncoding;
++    bool m_pluginsEnabled;
+     QString m_proxyType;
+     QString m_proxyHost;
+     int m_proxyPort;
+diff --git a/src/qt/preconfig.sh b/src/qt/preconfig.sh
+index 7cfafa0..4016c19 100755
+--- a/src/qt/preconfig.sh
++++ b/src/qt/preconfig.sh
+@@ -15,7 +15,7 @@ if [[ $OSTYPE = darwin* ]]; then
+ else
+     QT_CFG+=' -system-freetype' # Freetype for text rendering
+     QT_CFG+=' -fontconfig'      # Fontconfig for better font matching
+-    QT_CFG+=' -qpa'             # X11-less with QPA (aka Lighthouse)
++#    QT_CFG+=' -qpa'             # X11-less with QPA (aka Lighthouse)
+ fi
+ 
+ QT_CFG+=' -release'             # Build only for release (no debugging support)
+@@ -47,16 +47,16 @@ QT_CFG+=' -no-svg'
+ QT_CFG+=' -no-xmlpatterns'
+ 
+ # Unnecessary Qt features
+-QT_CFG+=' -D QT_NO_GRAPHICSVIEW'
+-QT_CFG+=' -D QT_NO_GRAPHICSEFFECT'
++#QT_CFG+=' -D QT_NO_GRAPHICSVIEW'
++#QT_CFG+=' -D QT_NO_GRAPHICSEFFECT'
+ 
+ # Sets the default graphics system to the raster engine
+ QT_CFG+=' -graphicssystem raster'
+ 
+ # Unix
+ QT_CFG+=' -no-dbus'             # Disable D-Bus feature
+-QT_CFG+=' -no-glib'             # No need for Glib integration
+-QT_CFG+=' -no-gstreamer'        # Turn off GStreamer support
++#QT_CFG+=' -no-glib'             # No need for Glib integration
++#QT_CFG+=' -no-gstreamer'        # Turn off GStreamer support
+ QT_CFG+=' -no-gtkstyle'         # Disable theming integration with Gtk+
+ QT_CFG+=' -no-cups'             # Disable CUPs support
+ QT_CFG+=' -no-sm'
+diff --git a/src/qt/src/3rdparty/webkit/Source/WebCore/features.pri b/src/qt/src/3rdparty/webkit/Source/WebCore/features.pri
+index 2b8b281..467a71d 100644
+--- a/src/qt/src/3rdparty/webkit/Source/WebCore/features.pri
++++ b/src/qt/src/3rdparty/webkit/Source/WebCore/features.pri
+@@ -1,7 +1,7 @@
+ # Setting up features (enabled/disabled)
+ 
+ CONFIG(minimal) {
+-    DEFINES += ENABLE_NETSCAPE_PLUGIN_API=0
++    #DEFINES += ENABLE_NETSCAPE_PLUGIN_API=1
+ }
+ 
+ CONFIG(production) {
+@@ -99,7 +99,7 @@ contains(DEFINES, ENABLE_SINGLE_THREADED=1) {
+ !contains(DEFINES, ENABLE_TILED_BACKING_STORE=.): DEFINES += ENABLE_TILED_BACKING_STORE=1
+ 
+ # Always disable NPAPI
+-DEFINES += ENABLE_NETSCAPE_PLUGIN_API=0
++DEFINES += ENABLE_NETSCAPE_PLUGIN_API=1
+ 
+ # Nescape plugins support (NPAPI)
+ !contains(DEFINES, ENABLE_NETSCAPE_PLUGIN_API=.) {
+diff --git a/src/qt/src/src.pro b/src/qt/src/src.pro
+index 413acba..d5a50b8 100644
+--- a/src/qt/src/src.pro
++++ b/src/qt/src/src.pro
+@@ -23,6 +23,7 @@ contains(QT_CONFIG, webkit)  {
+     SRC_SUBDIRS += src_webkit
+ }
+ !contains(QT_CONFIG, no-gui):contains(QT_CONFIG, scripttools): SRC_SUBDIRS += src_scripttools
++#SRC_SUBDIRS += src_plugins
+ contains(QT_CONFIG, declarative): SRC_SUBDIRS += src_imports
+ 
+ # s60installs need to be at the end, because projects.pro does an ordered build,
+diff --git a/tools/preconfig.sh b/tools/preconfig.sh
+index 9d36c7d..ca15e4e 100755
+--- a/tools/preconfig.sh
++++ b/tools/preconfig.sh
+@@ -15,7 +15,7 @@ if [[ $OSTYPE = darwin* ]]; then
+ else
+     QT_CFG+=' -system-freetype' # Freetype for text rendering
+     QT_CFG+=' -fontconfig'      # Fontconfig for better font matching
+-    QT_CFG+=' -qpa'             # X11-less with QPA (aka Lighthouse)
++    #QT_CFG+=' -qpa'             # X11-less with QPA (aka Lighthouse)
+ fi
+ 
+ QT_CFG+=' -release'             # Build only for release (no debugging support)
+-- 
+1.7.10.4
+
+
+From 241520713f1ad7246a7b5951f93c01cefc14ffac Mon Sep 17 00:00:00 2001
+From: ryan bridges <ryan.bridges@turner.com>
+Date: Mon, 20 May 2013 09:36:01 -0400
+Subject: [PATCH 2/5] reconnecting the last of the config options
+
+---
+ src/consts.h    |    1 +
+ src/phantom.cpp |    1 +
+ src/webpage.cpp |    1 +
+ 3 files changed, 3 insertions(+)
+
+diff --git a/src/consts.h b/src/consts.h
+index 0eb5178..557623e 100644
+--- a/src/consts.h
++++ b/src/consts.h
+@@ -54,6 +54,7 @@
+     "document.body.appendChild(el);"
+ 
+ #define PAGE_SETTINGS_LOAD_IMAGES           "loadImages"
++#define PAGE_SETTINGS_PLUGINS_ENABLED            "pluginsEnabled"
+ #define PAGE_SETTINGS_JS_ENABLED            "javascriptEnabled"
+ #define PAGE_SETTINGS_XSS_AUDITING          "XSSAuditingEnabled"
+ #define PAGE_SETTINGS_USER_AGENT            "userAgent"
+diff --git a/src/phantom.cpp b/src/phantom.cpp
+index 1f31795..de788e3 100644
+--- a/src/phantom.cpp
++++ b/src/phantom.cpp
+@@ -135,6 +135,7 @@ void Phantom::init()
+             SLOT(onInitialized()));
+ 
+     m_defaultPageSettings[PAGE_SETTINGS_LOAD_IMAGES] = QVariant::fromValue(m_config.autoLoadImages());
++    m_defaultPageSettings[PAGE_SETTINGS_PLUGINS_ENABLED] = QVariant::fromValue(true);
+     m_defaultPageSettings[PAGE_SETTINGS_JS_ENABLED] = QVariant::fromValue(true);
+     m_defaultPageSettings[PAGE_SETTINGS_XSS_AUDITING] = QVariant::fromValue(false);
+     m_defaultPageSettings[PAGE_SETTINGS_USER_AGENT] = QVariant::fromValue(m_page->userAgent());
+diff --git a/src/webpage.cpp b/src/webpage.cpp
+index 89a34da..ebc933e 100644
+--- a/src/webpage.cpp
++++ b/src/webpage.cpp
+@@ -567,6 +567,7 @@ void WebPage::applySettings(const QVariantMap &def)
+     QWebSettings *opt = m_customWebPage->settings();
+ 
+     opt->setAttribute(QWebSettings::AutoLoadImages, def[PAGE_SETTINGS_LOAD_IMAGES].toBool());
++    opt->setAttribute(QWebSettings::PluginsEnabled, def[PAGE_SETTINGS_PLUGINS_ENABLED].toBool());
+     opt->setAttribute(QWebSettings::JavascriptEnabled, def[PAGE_SETTINGS_JS_ENABLED].toBool());
+     opt->setAttribute(QWebSettings::XSSAuditingEnabled, def[PAGE_SETTINGS_XSS_AUDITING].toBool());
+     opt->setAttribute(QWebSettings::LocalContentCanAccessRemoteUrls, def[PAGE_SETTINGS_LOCAL_ACCESS_REMOTE].toBool());
+-- 
+1.7.10.4
+
+
+From a2a24be7a42db55e63d32bb4b40035c60032a45a Mon Sep 17 00:00:00 2001
+From: ryan bridges <ryan.bridges@turner.com>
+Date: Thu, 23 May 2013 00:19:12 -0400
+Subject: [PATCH 3/5] removing dependencies that had been erroneously
+ re-introduced
+
+---
+ src/qt/preconfig.sh |    8 ++++----
+ 1 file changed, 4 insertions(+), 4 deletions(-)
+
+diff --git a/src/qt/preconfig.sh b/src/qt/preconfig.sh
+index 4016c19..a9cad31 100755
+--- a/src/qt/preconfig.sh
++++ b/src/qt/preconfig.sh
+@@ -47,16 +47,16 @@ QT_CFG+=' -no-svg'
+ QT_CFG+=' -no-xmlpatterns'
+ 
+ # Unnecessary Qt features
+-#QT_CFG+=' -D QT_NO_GRAPHICSVIEW'
+-#QT_CFG+=' -D QT_NO_GRAPHICSEFFECT'
++QT_CFG+=' -D QT_NO_GRAPHICSVIEW'
++QT_CFG+=' -D QT_NO_GRAPHICSEFFECT'
+ 
+ # Sets the default graphics system to the raster engine
+ QT_CFG+=' -graphicssystem raster'
+ 
+ # Unix
+ QT_CFG+=' -no-dbus'             # Disable D-Bus feature
+-#QT_CFG+=' -no-glib'             # No need for Glib integration
+-#QT_CFG+=' -no-gstreamer'        # Turn off GStreamer support
++QT_CFG+=' -no-glib'             # No need for Glib integration
++QT_CFG+=' -no-gstreamer'        # Turn off GStreamer support
+ QT_CFG+=' -no-gtkstyle'         # Disable theming integration with Gtk+
+ QT_CFG+=' -no-cups'             # Disable CUPs support
+ QT_CFG+=' -no-sm'
+-- 
+1.7.10.4
+
+
+From 12cfa9fe7ec58f7fa13c62319bf6c76892e51d2a Mon Sep 17 00:00:00 2001
+From: ryan bridges <ryan.bridges@turner.com>
+Date: Thu, 23 May 2013 09:00:53 -0400
+Subject: [PATCH 4/5] removing '=yes'
+
+---
+ src/config.cpp |    2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/src/config.cpp b/src/config.cpp
+index 724ba1c..dd2ee90 100644
+--- a/src/config.cpp
++++ b/src/config.cpp
+@@ -652,7 +652,7 @@ void Config::handleOption(const QString &option, const QVariant &value)
+     if (option == "load-images") {
+         setAutoLoadImages(boolValue);
+     }
+-    if (option == "load-plugins=yes") {
++    if (option == "load-plugins") {
+             setPluginsEnabled(boolValue);
+     }
+     if (option == "local-storage-path") {
+-- 
+1.7.10.4
+
+
+From 81618cc97a94620cb822eea5fe26deaff9ada46f Mon Sep 17 00:00:00 2001
+From: ryan bridges <ryan.bridges@turner.com>
+Date: Fri, 24 May 2013 23:18:14 -0400
+Subject: [PATCH 5/5] glib and gstreamer are needed for the plugin to be
+ visible in page.render
+
+---
+ src/qt/preconfig.sh |    4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/src/qt/preconfig.sh b/src/qt/preconfig.sh
+index a9cad31..fd55ecd 100755
+--- a/src/qt/preconfig.sh
++++ b/src/qt/preconfig.sh
+@@ -55,8 +55,8 @@ QT_CFG+=' -graphicssystem raster'
+ 
+ # Unix
+ QT_CFG+=' -no-dbus'             # Disable D-Bus feature
+-QT_CFG+=' -no-glib'             # No need for Glib integration
+-QT_CFG+=' -no-gstreamer'        # Turn off GStreamer support
++#QT_CFG+=' -no-glib'             # No need for Glib integration
++#QT_CFG+=' -no-gstreamer'        # Turn off GStreamer support
+ QT_CFG+=' -no-gtkstyle'         # Disable theming integration with Gtk+
+ QT_CFG+=' -no-cups'             # Disable CUPs support
+ QT_CFG+=' -no-sm'
+-- 
+1.7.10.4
+
