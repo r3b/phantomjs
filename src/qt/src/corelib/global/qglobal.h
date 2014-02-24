@@ -327,7 +327,10 @@ namespace QT_NAMESPACE {}
 #  if !defined(MAC_OS_X_VERSION_10_8)
 #       define MAC_OS_X_VERSION_10_8 MAC_OS_X_VERSION_10_7 + 1
 #  endif
-#  if (MAC_OS_X_VERSION_MAX_ALLOWED > MAC_OS_X_VERSION_10_8)
+#  if !defined(MAC_OS_X_VERSION_10_9)
+#       define MAC_OS_X_VERSION_10_9 MAC_OS_X_VERSION_10_8 + 1
+#  endif
+#  if (MAC_OS_X_VERSION_MAX_ALLOWED > MAC_OS_X_VERSION_10_9)
 #    warning "This version of Mac OS X is unsupported"
 #  endif
 #endif

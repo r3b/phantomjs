@@ -278,6 +278,10 @@ contains(DEFINES, ENABLE_VIDEO=1) {
             LIBS += $$SOURCE_DIR/../WebKitLibraries/libWebKitSystemInterfaceLion.a
         } else: equals(DARWIN_MAJOR_VERSION, "12") | contains(QMAKE_MAC_SDK, "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.8.sdk") {
             LIBS += $$SOURCE_DIR/../WebKitLibraries/libWebKitSystemInterfaceMountainLion.a
+        } else: equals(DARWIN_MAJOR_VERSION, "13") | contains(QMAKE_MAC_SDK, "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.9.sdk") {
+            LIBS += $$SOURCE_DIR/../WebKitLibraries/libWebKitSystemInterfaceMavericks.a
+        } else {
+            LIBS += $$SOURCE_DIR/../WebKitLibraries/libWebKitSystemInterfaceMavericks.a
         }
     }
 }

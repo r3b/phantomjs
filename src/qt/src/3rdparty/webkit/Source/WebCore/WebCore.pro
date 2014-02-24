@@ -2583,9 +2583,9 @@ contains(DEFINES, ENABLE_NETSCAPE_PLUGIN_API=1) {
             SOURCES += \
                 plugins/mac/PluginPackageMac.cpp
             OBJECTIVE_SOURCES += \
-                platform/text/mac/StringImplMac.mm \
-                platform/mac/WebCoreNSStringExtras.mm \
-                plugins/mac/PluginViewMac.mm
+                ../../WebCore/platform/text/mac/StringImplMac.mm \
+                ../../WebCore/platform/mac/WebCoreNSStringExtras.mm \
+                ../../WebCore/plugins/mac/PluginViewMac.mm
         } else {
             SOURCES += \
                 plugins/qt/PluginContainerQt.cpp \
