@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
+** Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of the QtGui module of the Qt Toolkit.
@@ -133,10 +133,6 @@
 
 #ifdef Q_OS_BLACKBERRY
 #include <bps/navigator.h>
-#endif
-
-#ifdef Q_OS_BLACKBERRY_TABLET
-#include <bps/orientation.h>
 #endif
 
 // widget/widget data creation count
@@ -424,23 +420,28 @@ void QWidgetPrivate::scrollChildren(int dx, int dy)
     }
 }
 
-#ifndef QT_NO_IM
 QInputContext *QWidgetPrivate::assignedInputContext() const
 {
+#ifndef QT_NO_IM
     const QWidget *widget = q_func();
     while (widget) {
         if (QInputContext *qic = widget->d_func()->ic)
             return qic;
         widget = widget->parentWidget();
     }
+#endif
     return 0;
 }
 
 QInputContext *QWidgetPrivate::inputContext() const
 {
+#ifndef QT_NO_IM
     if (QInputContext *qic = assignedInputContext())
         return qic;
     return qApp->inputContext();
+#else
+    return 0;
+#endif
 }
 
 /*!
@@ -475,7 +476,7 @@ void QWidget::setInputContext(QInputContext *context)
     Q_D(QWidget);
     if (!testAttribute(Qt::WA_InputMethodEnabled))
         return;
-
+#ifndef QT_NO_IM
     if (context == d->ic)
         return;
     if (d->ic)
@@ -483,8 +484,9 @@ void QWidget::setInputContext(QInputContext *context)
     d->ic = context;
     if (d->ic)
         d->ic->setParent(this);
+#endif
 }
-#endif // QT_NO_IM
+
 
 /*!
     \obsolete
@@ -5306,9 +5308,6 @@ QGraphicsEffect *QWidget::graphicsEffect() const
 
     \note This function will apply the effect on itself and all its children.
 
-    \note Graphics effects are not supported on Mac, so they will not cause any difference
-    to the rendering of the widget.
-
     \since 4.6
 
     \sa graphicsEffect()
@@ -5494,7 +5493,7 @@ void QWidgetPrivate::drawWidget(QPaintDevice *pdev, const QRegion &rgn, const QP
 
 
     Q_Q(QWidget);
-#if !defined(QT_NO_GRAPHICSEFFECT) && !defined(Q_WS_MAC)
+#ifndef QT_NO_GRAPHICSEFFECT
     if (graphicsEffect && graphicsEffect->isEnabled()) {
         QGraphicsEffectSource *source = graphicsEffect->d_func()->source;
         QWidgetEffectSourcePrivate *sourced = static_cast<QWidgetEffectSourcePrivate *>
@@ -9431,8 +9430,6 @@ void QWidget::setInputMethodHints(Qt::InputMethodHints hints)
 {
 #ifndef QT_NO_IM
     Q_D(QWidget);
-    if (d->imHints == hints)
-        return;
     d->imHints = hints;
     // Optimization to update input context only it has already been created.
     if (d->ic || qApp->d_func()->inputContext) {
@@ -10561,16 +10558,11 @@ void QWidget::update()
 */
 void QWidget::update(const QRect &rect)
 {
-    if (!isVisible() || !updatesEnabled())
-        return;
-
-    QRect r = rect & QWidget::rect();
-
-    if (r.isEmpty())
+    if (!isVisible() || !updatesEnabled() || rect.isEmpty())
         return;
 
     if (testAttribute(Qt::WA_WState_InPaintEvent)) {
-        QApplication::postEvent(this, new QUpdateLaterEvent(r));
+        QApplication::postEvent(this, new QUpdateLaterEvent(rect));
         return;
     }
 
@@ -10583,9 +10575,9 @@ void QWidget::update(const QRect &rect)
 #endif // QT_MAC_USE_COCOA
         QTLWExtra *tlwExtra = window()->d_func()->maybeTopData();
         if (tlwExtra && !tlwExtra->inTopLevelResize && tlwExtra->backingStore)
-            tlwExtra->backingStore->markDirty(r, this);
+            tlwExtra->backingStore->markDirty(rect, this);
     } else {
-        d_func()->repaint_sys(r);
+        d_func()->repaint_sys(rect);
     }
 }
 
@@ -10599,13 +10591,8 @@ void QWidget::update(const QRegion &rgn)
     if (!isVisible() || !updatesEnabled() || rgn.isEmpty())
         return;
 
-    QRegion r = rgn & QWidget::rect();
-
-    if (r.isEmpty())
-        return;
-
     if (testAttribute(Qt::WA_WState_InPaintEvent)) {
-        QApplication::postEvent(this, new QUpdateLaterEvent(r));
+        QApplication::postEvent(this, new QUpdateLaterEvent(rgn));
         return;
     }
 
@@ -10618,9 +10605,9 @@ void QWidget::update(const QRegion &rgn)
 #endif // QT_MAC_USE_COCOA
         QTLWExtra *tlwExtra = window()->d_func()->maybeTopData();
         if (tlwExtra && !tlwExtra->inTopLevelResize && tlwExtra->backingStore)
-            tlwExtra->backingStore->markDirty(r, this);
+            tlwExtra->backingStore->markDirty(rgn, this);
     } else {
-        d_func()->repaint_sys(r);
+        d_func()->repaint_sys(rgn);
     }
 }
 
@@ -11033,35 +11020,11 @@ void QWidget::setAttribute(Qt::WidgetAttribute attribute, bool on)
         if (testAttribute(Qt::WA_AutoOrientation)) {
             navigator_rotation_lock(false);
         } else {
-#ifdef Q_OS_BLACKBERRY_TABLET
-            const bool portraitLocked = testAttribute(Qt::WA_LockPortraitOrientation);
-
-            orientation_direction_t direction;
-            orientation_get(&direction, 0);
-
-            int rotation = 0;
-
-            switch (direction) {
-            case ORIENTATION_TOP_UP:
-            case ORIENTATION_RIGHT_UP:
-                rotation = portraitLocked ? 90 : 0;
-                break;
-            case ORIENTATION_BOTTOM_UP:
-            case ORIENTATION_LEFT_UP:
-                rotation = portraitLocked ? 270 : 180;
-                break;
-            default:
-                break;
-            }
-
-            navigator_set_orientation(rotation, 0);
-#else
             navigator_set_orientation_mode((testAttribute(Qt::WA_LockPortraitOrientation) ?
                                             NAVIGATOR_PORTRAIT : NAVIGATOR_LANDSCAPE), 0);
-#endif // Q_OS_BLACKBERRY_TABLET
             navigator_rotation_lock(true);
         }
-#endif // Q_OS_BLACKBERRY
+#endif
 
 #ifdef Q_WS_S60
         CAknAppUiBase* appUi = static_cast<CAknAppUiBase*>(CEikonEnv::Static()->EikAppUi());

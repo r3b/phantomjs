@@ -37,9 +37,6 @@
 #define PHANTOMJS_VERSION_PATCH     0
 #define PHANTOMJS_VERSION_STRING    "1.10.0 (development)"
 
-#define HTTP_HEADER_CONTENT_LENGTH      "content-length"
-#define HTTP_HEADER_CONTENT_TYPE        "content-type"
-
 #define COFFEE_SCRIPT_EXTENSION     ".coffee"
 
 #define JS_ELEMENT_CLICK "(function (el) { " \
@@ -54,6 +51,7 @@
     "document.body.appendChild(el);"
 
 #define PAGE_SETTINGS_LOAD_IMAGES           "loadImages"
+#define PAGE_SETTINGS_PLUGINS_ENABLED            "pluginsEnabled"
 #define PAGE_SETTINGS_JS_ENABLED            "javascriptEnabled"
 #define PAGE_SETTINGS_XSS_AUDITING          "XSSAuditingEnabled"
 #define PAGE_SETTINGS_USER_AGENT            "userAgent"

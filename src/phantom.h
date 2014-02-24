@@ -39,7 +39,6 @@
 #include "config.h"
 #include "system.h"
 #include "childprocess.h"
-#include "cookiejar.h"
 
 class WebPage;
 class CustomPage;
@@ -109,7 +108,6 @@ public:
     Q_INVOKABLE QObject *_createChildProcess();
 
 public slots:
-    QObject *createCookieJar(const QString &filePath);
     QObject *createWebPage();
     QObject *createWebServer();
     QObject *createFilesystem();
@@ -195,7 +193,6 @@ private:
     QList<QPointer<WebPage> > m_pages;
     QList<QPointer<WebServer> > m_servers;
     Config m_config;
-    CookieJar *m_defaultCookieJar;
 
     friend class CustomPage;
 };

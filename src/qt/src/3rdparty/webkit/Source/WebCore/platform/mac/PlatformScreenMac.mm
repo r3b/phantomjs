@@ -78,7 +78,11 @@ NSScreen *screenForWindow(NSWindow *window)
 
 static CGFloat windowScaleFactor(NSWindow *window)
 {
+#if !defined(BUILDING_ON_LEOPARD) && !defined(BUILDING_ON_SNOW_LEOPARD)
     return [window backingScaleFactor];
+#else
+    return [window userSpaceScaleFactor];
+#endif
 }
 
 FloatRect toUserSpace(const NSRect& rect, NSWindow *destination)

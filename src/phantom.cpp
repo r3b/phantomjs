@@ -97,10 +97,9 @@ void Phantom::init()
     }
 
     // Initialize the CookieJar
-    m_defaultCookieJar = new CookieJar(m_config.cookiesFile());
+    CookieJar::instance(m_config.cookiesFile());
 
     m_page = new WebPage(this, QUrl::fromLocalFile(m_config.scriptFile()));
-    m_page->setCookieJar(m_defaultCookieJar);
     m_pages.append(m_page);
 
     QString proxyType = m_config.proxyType();
@@ -136,6 +135,7 @@ void Phantom::init()
             SLOT(onInitialized()));
 
     m_defaultPageSettings[PAGE_SETTINGS_LOAD_IMAGES] = QVariant::fromValue(m_config.autoLoadImages());
+    m_defaultPageSettings[PAGE_SETTINGS_PLUGINS_ENABLED] = QVariant::fromValue(true);
     m_defaultPageSettings[PAGE_SETTINGS_JS_ENABLED] = QVariant::fromValue(true);
     m_defaultPageSettings[PAGE_SETTINGS_XSS_AUDITING] = QVariant::fromValue(false);
     m_defaultPageSettings[PAGE_SETTINGS_USER_AGENT] = QVariant::fromValue(m_page->userAgent());
@@ -206,21 +206,12 @@ bool Phantom::execute()
         qDebug() << "Phantom - execute: Starting Remote WebDriver mode";
 
         Terminal::instance()->cout("PhantomJS is launching GhostDriver...");
-        if (!Utils::injectJsInFrame(":/ghostdriver/main.js", QString(), m_scriptFileEnc, QDir::currentPath(), m_page->mainFrame(), true)) {
+        if (!Utils::injectJsInFrame(":/ghostdriver/main.js", m_scriptFileEnc, QDir::currentPath(), m_page->mainFrame(), true)) {
             m_returnValue = -1;
             return false;
         }
     } else if (m_config.scriptFile().isEmpty()) {                       // REPL mode requested
         qDebug() << "Phantom - execute: Starting REPL mode";
-
-        // REPL is only valid for javascript
-        const QString &scriptLanguage = m_config.scriptLanguage();
-        if (scriptLanguage != "javascript" && !scriptLanguage.isNull()) {
-            QString errMessage = QString("Unsupported language: %1").arg(scriptLanguage);
-            Terminal::instance()->cerr(errMessage);
-            qWarning("%s", qPrintable(errMessage));
-            return false;
-        }
 
         // Create the REPL: it will launch itself, no need to store this variable.
         REPL::getInstance(m_page->mainFrame(), this);
@@ -229,13 +220,13 @@ bool Phantom::execute()
 
         if (m_config.debug()) {
             // Debug enabled
-            if (!Utils::loadJSForDebug(m_config.scriptFile(), m_config.scriptLanguage(), m_scriptFileEnc, QDir::currentPath(), m_page->mainFrame(), m_config.remoteDebugAutorun())) {
+            if (!Utils::loadJSForDebug(m_config.scriptFile(), m_scriptFileEnc, QDir::currentPath(), m_page->mainFrame(), m_config.remoteDebugAutorun())) {
                 m_returnValue = -1;
                 return false;
             }
             m_page->showInspector(m_config.remoteDebugPort());
         } else {
-            if (!Utils::injectJsInFrame(m_config.scriptFile(), m_config.scriptLanguage(), m_scriptFileEnc, QDir::currentPath(), m_page->mainFrame(), true)) {
+            if (!Utils::injectJsInFrame(m_config.scriptFile(), m_scriptFileEnc, QDir::currentPath(), m_page->mainFrame(), true)) {
                 m_returnValue = -1;
                 return false;
             }
@@ -291,15 +282,15 @@ bool Phantom::printDebugMessages() const
 
 bool Phantom::areCookiesEnabled() const
 {
-    return m_defaultCookieJar->isEnabled();
+    return CookieJar::instance()->isEnabled();
 }
 
 void Phantom::setCookiesEnabled(const bool value)
 {
     if (value) {
-        m_defaultCookieJar->enable();
+        CookieJar::instance()->enable();
     } else {
-        m_defaultCookieJar->disable();
+        CookieJar::instance()->disable();
     }
 }
 
@@ -309,14 +300,9 @@ bool Phantom::webdriverMode() const
 }
 
 // public slots:
-QObject *Phantom::createCookieJar(const QString& filePath) {
-    return new CookieJar(filePath, this);
-}
-
 QObject *Phantom::createWebPage()
 {
     WebPage *page = new WebPage(this);
-    page->setCookieJar(m_defaultCookieJar);
 
     // Store pointer to the page for later cleanup
     m_pages.append(page);
@@ -442,33 +428,33 @@ void Phantom::onInitialized()
 bool Phantom::setCookies(const QVariantList &cookies)
 {
     // Delete all the cookies from the CookieJar
-    m_defaultCookieJar->clearCookies();
+    CookieJar::instance()->clearCookies();
     // Add a new set of cookies
-    return m_defaultCookieJar->addCookiesFromMap(cookies);
+    return CookieJar::instance()->addCookiesFromMap(cookies);
 }
 
 QVariantList Phantom::cookies() const
 {
     // Return all the Cookies in the CookieJar, as a list of Maps (aka JSON in JS space)
-    return m_defaultCookieJar->cookiesToMap();
+    return CookieJar::instance()->cookiesToMap();
 }
 
 bool Phantom::addCookie(const QVariantMap &cookie)
 {
-    return m_defaultCookieJar->addCookieFromMap(cookie);
+    return CookieJar::instance()->addCookieFromMap(cookie);
 }
 
 bool Phantom::deleteCookie(const QString &cookieName)
 {
     if (!cookieName.isEmpty()) {
-        return m_defaultCookieJar->deleteCookie(cookieName);
+        return CookieJar::instance()->deleteCookie(cookieName);
     }
     return false;
 }
 
 void Phantom::clearCookies()
 {
-    m_defaultCookieJar->clearCookies();
+    CookieJar::instance()->clearCookies();
 }
 
 

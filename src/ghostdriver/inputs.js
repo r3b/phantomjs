@@ -1,8 +1,7 @@
 /*
 This file is part of the GhostDriver by Ivan De Marino <http://ivandemarino.me>.
 
-Copyright (c) 2014, Jim Evans <james.h.evans.jr@gmail.com> - Salesforce.com
-Copyright (c) 2014, Ivan De Marino <http://ivandemarino.me>
+Copyright (c) 2010, Jim Evans <james.h.evans.jr@gmail.com> - Salesforce.com
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without modification,
@@ -313,11 +312,11 @@ ghostdriver.Inputs = function () {
     },
 
     _mouseButtonDown = function (session, button) {
-        _mouseButtonEvent(session, "mousedown", button);
+        _mouseButtonClick(session, "mousedown", button);
     },
 
     _mouseButtonUp = function (session, button) {
-        _mouseButtonEvent(session, "mouseUp", button);
+        _mouseButtonClick(session, "mouseUp", button);
     },
 
     _keyEvent = function (session, eventType, keyCode) {

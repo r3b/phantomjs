@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
+** Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of the QtGui module of the Qt Toolkit.
@@ -1708,10 +1708,8 @@ void QGtkStyle::drawComplexControl(ComplexControl control, const QStyleOptionCom
 
 
             GtkRange *range = (GtkRange*)(horizontal ? gtkHScrollBar : gtkVScrollBar);
-            GtkAdjustment *adjustment = 0;
+            GtkAdjustment *adjustment = d->gtk_range_get_adjustment(range);
 
-            if (d->gtk_adjustment_configure)
-                adjustment = d->gtk_range_get_adjustment(range);
             if (adjustment) {
                 d->gtk_adjustment_configure(adjustment, fakePos, 0, maximum, 0, 0, 0);
             } else {

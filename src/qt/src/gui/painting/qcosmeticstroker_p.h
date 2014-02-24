@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
+** Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of the QtGui module of the Qt Toolkit.
@@ -86,9 +86,8 @@ public:
         HorizontalMask = 0xc
     };
 
-    QCosmeticStroker(QRasterPaintEngineState *s, const QRect &dr, const QRect &dr_unclipped)
+    QCosmeticStroker(QRasterPaintEngineState *s, const QRect &dr)
         : state(s),
-          deviceRect(dr_unclipped),
           clip(dr),
           pattern(0),
           reversePattern(0),
@@ -107,7 +106,6 @@ public:
 
 
     QRasterPaintEngineState *state;
-    QRect deviceRect;
     QRect clip;
     // clip bounds in real
     qreal xmin, xmax;

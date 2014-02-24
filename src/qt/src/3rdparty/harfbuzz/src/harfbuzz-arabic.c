@@ -1111,22 +1111,16 @@ HB_Bool HB_ArabicShape(HB_ShaperItem *item)
 
     if (HB_SelectScript(item, item->item.script == HB_Script_Arabic ? arabic_features : syriac_features)) {
         HB_Bool ot_ok;
-        if (arabicSyriacOpenTypeShape(item, &ot_ok)) {
-            HB_FREE_STACKARRAY(shapedChars);
+        if (arabicSyriacOpenTypeShape(item, &ot_ok))
             return TRUE;
-        }
-        if (ot_ok) {
-            HB_FREE_STACKARRAY(shapedChars);
+        if (ot_ok)
             return FALSE;
             /* fall through to the non OT code*/
-        }
     }
 #endif
 
-    if (item->item.script != HB_Script_Arabic) {
-        HB_FREE_STACKARRAY(shapedChars);
+    if (item->item.script != HB_Script_Arabic)
         return HB_BasicShape(item);
-    }
 
     shapedString(item->string, item->stringLength, item->item.pos, item->item.length, shapedChars, &slen,
                   item->item.bidiLevel % 2,

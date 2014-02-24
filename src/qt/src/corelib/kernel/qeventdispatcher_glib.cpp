@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
+** Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of the QtCore module of the Qt Toolkit.
@@ -260,11 +260,10 @@ static gboolean postEventSourcePrepare(GSource *s, gint *timeout)
     gint dummy;
     if (!timeout)
         timeout = &dummy;
-    const bool canWait = data->canWaitLocked();
-    *timeout = canWait ? -1 : 0;
+    *timeout = data->canWait ? -1 : 0;
 
     GPostEventSource *source = reinterpret_cast<GPostEventSource *>(s);
-    return (!canWait
+    return (!data->canWait
             || (source->serialNumber != source->lastSerialNumber));
 }
 

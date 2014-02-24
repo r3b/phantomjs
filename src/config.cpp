@@ -54,6 +54,7 @@ static const struct QCommandLineConfigEntry flags[] =
     { QCommandLine::Option, '\0', "disk-cache", "Enables disk cache: 'true' or 'false' (default)", QCommandLine::Optional },
     { QCommandLine::Option, '\0', "ignore-ssl-errors", "Ignores SSL errors (expired/self-signed certificate errors): 'true' or 'false' (default)", QCommandLine::Optional },
     { QCommandLine::Option, '\0', "load-images", "Loads all inlined images: 'true' (default) or 'false'", QCommandLine::Optional },
+    { QCommandLine::Option, '\0', "load-plugins", "Loads all plugins: 'true' (default) or 'false'", QCommandLine::Optional },
     { QCommandLine::Option, '\0', "local-storage-path", "Specifies the location for offline local storage", QCommandLine::Optional },
     { QCommandLine::Option, '\0', "local-storage-quota", "Sets the maximum size of the offline local storage (in KB)", QCommandLine::Optional },
     { QCommandLine::Option, '\0', "local-to-remote-url-access", "Allows local content to access remote URL: 'true' or 'false' (default)", QCommandLine::Optional },
@@ -65,7 +66,6 @@ static const struct QCommandLineConfigEntry flags[] =
     { QCommandLine::Option, '\0', "proxy-auth", "Provides authentication information for the proxy, e.g. ''-proxy-auth=username:password'", QCommandLine::Optional },
     { QCommandLine::Option, '\0', "proxy-type", "Specifies the proxy type, 'http' (default), 'none' (disable completely), or 'socks5'", QCommandLine::Optional },
     { QCommandLine::Option, '\0', "script-encoding", "Sets the encoding used for the starting script, default is 'utf8'", QCommandLine::Optional },
-    { QCommandLine::Option, '\0', "script-language", "Sets the script language instead of detecting it: 'javascript', 'coffeescript'", QCommandLine::Optional },
     { QCommandLine::Option, '\0', "web-security", "Enables web security, 'true' (default) or 'false'", QCommandLine::Optional },
     { QCommandLine::Option, '\0', "ssl-protocol", "Sets the SSL protocol (supported protocols: 'SSLv3' (default), 'SSLv2', 'TLSv1', 'any')", QCommandLine::Optional },
     { QCommandLine::Option, '\0', "ssl-certificates-path", "Sets the location for custom CA certificates (if none set, uses system default)", QCommandLine::Optional },
@@ -186,6 +186,15 @@ void Config::setAutoLoadImages(const bool value)
 {
     m_autoLoadImages = value;
 }
+bool Config::pluginsEnabled() const
+{
+    return m_pluginsEnabled;
+}
+
+void Config::setPluginsEnabled(const bool value)
+{
+    m_pluginsEnabled = value;
+}
 
 QString Config::cookiesFile() const
 {
@@ -284,17 +293,25 @@ void Config::setProxyType(const QString value)
 
 QString Config::proxy() const
 {
-    return m_proxyHost + ":" + QString::number(m_proxyPort);
+    return proxyHost() + ":" + proxyPort();
 }
 
 void Config::setProxy(const QString &value)
 {
-    QUrl proxyUrl = QUrl::fromUserInput(value);
+    QString proxyHost = value;
+    int proxyPort = 1080;
 
-    if (proxyUrl.isValid()) {
-        setProxyHost(proxyUrl.host());
-        setProxyPort(proxyUrl.port(1080));
+    if (proxyHost.lastIndexOf(':') > 0) {
+        bool ok = true;
+        int port = proxyHost.mid(proxyHost.lastIndexOf(':') + 1).toInt(&ok);
+        if (ok) {
+            proxyHost = proxyHost.left(proxyHost.lastIndexOf(':')).trimmed();
+            proxyPort = port;
+        }
     }
+
+    setProxyHost(proxyHost);
+    setProxyPort(proxyPort);
 }
 
 void Config::setProxyAuth(const QString &value)
@@ -363,20 +380,6 @@ void Config::setScriptEncoding(const QString &value)
     }
 
     m_scriptEncoding = value;
-}
-
-QString Config::scriptLanguage() const
-{
-    return m_scriptLanguage;
-}
-
-void Config::setScriptLanguage(const QString &value)
-{
-    if (value.isEmpty()) {
-        return;
-    }
-
-    m_scriptLanguage = value;
 }
 
 QString Config::scriptFile() const
@@ -543,7 +546,6 @@ void Config::resetToDefaults()
     m_proxyAuthPass.clear();
     m_scriptArgs.clear();
     m_scriptEncoding = "UTF-8";
-    m_scriptLanguage.clear();
     m_scriptFile.clear();
     m_unknownOption.clear();
     m_versionFlag = false;
@@ -623,6 +625,7 @@ void Config::handleOption(const QString &option, const QVariant &value)
     booleanFlags << "disk-cache";
     booleanFlags << "ignore-ssl-errors";
     booleanFlags << "load-images";
+    booleanFlags << "load-plugins";
     booleanFlags << "local-to-remote-url-access";
     booleanFlags << "remote-debugger-autorun";
     booleanFlags << "web-security";
@@ -657,7 +660,9 @@ void Config::handleOption(const QString &option, const QVariant &value)
     if (option == "load-images") {
         setAutoLoadImages(boolValue);
     }
-
+    if (option == "load-plugins") {
+            setPluginsEnabled(boolValue);
+    }
     if (option == "local-storage-path") {
         setOfflineStoragePath(value.toString());
     }
@@ -701,10 +706,6 @@ void Config::handleOption(const QString &option, const QVariant &value)
 
     if (option == "script-encoding") {
         setScriptEncoding(value.toString());
-    }
-
-    if (option == "script-language") {
-        setScriptLanguage(value.toString());
     }
 
     if (option == "web-security") {
