@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
+** Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of the QtCore module of the Qt Toolkit.
@@ -3574,10 +3574,7 @@ void QUrlPrivate::setAuthority(const QString &auth)
     isHostValid = true;
     if (auth.isEmpty()) {
         setUserInfo(QString());
-        if (auth.isNull())
-            host.clear();
-        else
-            host = QLatin1String("");
+        host.clear();
         port = -1;
         return;
     }
@@ -3920,7 +3917,7 @@ void QUrlPrivate::parse(ParseOptions parseOptions) const
 
         QByteArray h(parseData.host, parseData.hostLength);
         that->host = fromPercentEncodingMutable(&h);
-        that->port = uint(parseData.port) <= 0xffffU ? parseData.port : -1;
+        that->port = parseData.port;
 
         that->path.clear();
         that->encodedPath = QByteArray(parseData.path, parseData.pathLength);
@@ -3998,7 +3995,7 @@ QByteArray QUrlPrivate::toEncoded(QUrl::FormattingOptions options) const
     QString savedHost = host;  // pre-validation, may be invalid!
     QString auth = authority();
     bool doFileScheme = scheme == QLatin1String("file") && encodedPath.startsWith('/');
-    if ((options & QUrl::RemoveAuthority) != QUrl::RemoveAuthority && (!auth.isNull() || doFileScheme || !savedHost.isEmpty())) {
+    if ((options & QUrl::RemoveAuthority) != QUrl::RemoveAuthority && (!auth.isEmpty() || doFileScheme || !savedHost.isEmpty())) {
         if (doFileScheme && !encodedPath.startsWith('/'))
             url += '/';
         url += "//";
@@ -6684,11 +6681,12 @@ QUrl QUrl::fromUserInput(const QString &userInput)
     QUrl url = QUrl::fromEncoded(trimmedString.toUtf8(), QUrl::TolerantMode);
     QUrl urlPrepended = QUrl::fromEncoded("http://" + trimmedString.toUtf8(), QUrl::TolerantMode);
 
-    // Check the most common case of a valid url with a scheme
+    // Check the most common case of a valid url with scheme and host
     // We check if the port would be valid by adding the scheme to handle the case host:port
     // where the host would be interpretted as the scheme
     if (url.isValid()
         && !url.scheme().isEmpty()
+        && (!url.host().isEmpty() || !url.path().isEmpty())
         && urlPrepended.port() == -1)
         return url;
 

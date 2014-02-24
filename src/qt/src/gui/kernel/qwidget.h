@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
+** Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of the QtGui module of the Qt Toolkit.
@@ -42,7 +42,6 @@
 #ifndef QWIDGET_H
 #define QWIDGET_H
 
-#include <QtCore/qconfig.h>
 #include <QtGui/qwindowdefs.h>
 #include <QtCore/qobject.h>
 #include <QtCore/qmargins.h>
@@ -96,9 +95,7 @@ class QDragLeaveEvent;
 class QDropEvent;
 class QShowEvent;
 class QHideEvent;
-#ifndef QT_NO_IM
 class QInputContext;
-#endif
 class QIcon;
 class QWindowSurface;
 class QPlatformWindow;
@@ -620,10 +617,10 @@ public:
     QPaintEngine *paintEngine() const;
 
     void ensurePolished() const;
-#ifndef QT_NO_IM
+
     QInputContext *inputContext();
     void setInputContext(QInputContext *);
-#endif
+
     bool isAncestorOf(const QWidget *child) const;
 
 #ifdef QT_KEYPAD_NAVIGATION

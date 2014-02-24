@@ -1,8 +1,8 @@
 /*
 This file is part of the GhostDriver by Ivan De Marino <http://ivandemarino.me>.
 
-Copyright (c) 2014, Ivan De Marino <http://ivandemarino.me>
-Copyright (c) 2014, Alex Anderson <@alxndrsn>
+Copyright (c) 2012, Ivan De Marino <http://ivandemarino.me>
+Copyright (c) 2012, Alex Anderson <@alxndrsn>
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without modification,
@@ -293,10 +293,8 @@ ghostdriver.WebElementReqHand = function(idOrElement, session) {
                     _session.inputs.clearModifierKeys(_session);
                 }
 
-                currWindow.waitIfLoading(function() {
-                    // Return the result of this typing
-                    res.respondBasedOnResult(_session, req, typeRes);
-                });
+                // Return the result of this typing
+                res.respondBasedOnResult(_session, req, typeRes);
             }
             return;
         }
@@ -366,38 +364,49 @@ ghostdriver.WebElementReqHand = function(idOrElement, session) {
             abortCallback = false;
 
         currWindow.execFuncAndWaitForLoad(function() {
-                // do the submit
-                submitRes = currWindow.evaluate(require("./webdriver_atoms.js").get("submit"), _getJSON());
+            // do the submit
+            submitRes = currWindow.evaluate(require("./webdriver_atoms.js").get("submit"), _getJSON());
 
-                // If Submit was NOT positive, status will be set to something else than '0'
-                submitRes = JSON.parse(submitRes);
-                if (submitRes && submitRes.status !== 0) {
-                    abortCallback = true;           //< handling the error here
-                    res.respondBasedOnResult(_session, req, submitRes);
-                }
-            },
-            function(status) {                   //< onLoadFinished
-                // Report about the Load, only if it was not already handled
-                if (!abortCallback) {
+            // If Submit was NOT positive, status will be set to something else than '0'
+            submitRes = JSON.parse(submitRes);
+            if (submitRes && submitRes.status !== 0) {
+                abortCallback = true;           //< handling the error here
+                res.respondBasedOnResult(_session, req, submitRes);
+            }
+        }, function(status) {                   //< onLoadFinished
+            // Report about the Load, only if it was not already handled
+            if (!abortCallback) {
+                if (status === "success") {
                     res.success(_session.getId());
-                }
-            },
-            function(errMsg) {
-                var errCode = errMsg === "timeout"
-                    ? _errors.FAILED_CMD_STATUS.TIMEOUT
-                    : _errors.FAILED_CMD_STATUS.UNKNOWN_ERROR;
-
-                // Report Submit Error, only if callbacks were not "aborted"
-                if (!abortCallback) {
+                } else {
                     _errors.handleFailedCommandEH(
-                        errCode,
-                        "Submit failed: " + errMsg,
+                        _errors.FAILED_CMD_STATUS.UNKNOWN_ERROR,
+                        "Submit succeeded but Load Failed. Status: '" + status + "'",
                         req,
                         res,
                         _session,
                         "WebElementReqHand");
                 }
-            });
+            }
+        }, function(errMsg) {
+            if (errMsg === "timeout") {         //< onTimeout
+                _errors.handleFailedCommandEH(
+                    _errors.FAILED_CMD_STATUS.TIMEOUT,
+                    "Submit timed-out",
+                    req,
+                    res,
+                    _session,
+                    "WebElementReqHand");
+            } else {                            //< onError (generic)
+                _errors.handleFailedCommandEH(
+                    _errors.FAILED_CMD_STATUS.UNKNOWN_ERROR,
+                    "Submit failed: " + arguments[0],
+                    req,
+                    res,
+                    _session,
+                    "WebElementReqHand");
+            }
+        });
     },
 
     _postClickCommand = function(req, res) {
@@ -407,38 +416,52 @@ ghostdriver.WebElementReqHand = function(idOrElement, session) {
 
         // Clicking on Current Element can cause a page load, hence we need to wait for it to happen
         currWindow.execFuncAndWaitForLoad(function() {
-                // do the click
-                clickRes = currWindow.evaluate(require("./webdriver_atoms.js").get("click"), _getJSON());
+            // do the click
+            clickRes = currWindow.evaluate(require("./webdriver_atoms.js").get("click"), _getJSON());
 
-                // If Click was NOT positive, status will be set to something else than '0'
-                clickRes = JSON.parse(clickRes);
-                if (clickRes && clickRes.status !== 0) {
-                    abortCallback = true;           //< handling the error here
-                    res.respondBasedOnResult(_session, req, clickRes);
-                }
-            },
-            function(status) {                   //< onLoadFinished
-                // Report Load Finished, only if callbacks were not "aborted"
-                if (!abortCallback) {
+            // If Click was NOT positive, status will be set to something else than '0'
+            clickRes = JSON.parse(clickRes);
+            if (clickRes && clickRes.status !== 0) {
+                abortCallback = true;           //< handling the error here
+                res.respondBasedOnResult(_session, req, clickRes);
+            }
+        }, function(status) {                   //< onLoadFinished
+            // Report Load Finished, only if callbacks were not "aborted"
+            if (!abortCallback) {
+                if (status === "success") {
                     res.success(_session.getId());
-                }
-            },
-            function(errMsg) {
-                var errCode = errMsg === "timeout"
-                    ? _errors.FAILED_CMD_STATUS.TIMEOUT
-                    : _errors.FAILED_CMD_STATUS.UNKNOWN_ERROR;
-
-                // Report Load Error, only if callbacks were not "aborted"
-                if (!abortCallback) {
+                } else {
                     _errors.handleFailedCommandEH(
-                        errCode,
-                        "Click failed: " + errMsg,
+                        _errors.FAILED_CMD_STATUS.UNKNOWN_ERROR,
+                        "Click succeeded but Load Failed. Status: '" + status + "'",
                         req,
                         res,
                         _session,
                         "WebElementReqHand");
                 }
-            });
+            }
+        }, function(errMsg) {
+            // Report Load Error, only if callbacks were not "aborted"
+            if (!abortCallback) {
+                if (errMsg === "timeout") {       //< onTimeout
+                    _errors.handleFailedCommandEH(
+                        _errors.FAILED_CMD_STATUS.TIMEOUT,
+                        "Click failed: " + arguments[0],
+                        req,
+                        res,
+                        _session,
+                        "WebElementReqHand");
+                } else {                            //< onError
+                    _errors.handleFailedCommandEH(
+                        _errors.FAILED_CMD_STATUS.UNKNOWN_ERROR,
+                        "Click failed: " + arguments[0],
+                        req,
+                        res,
+                        _session,
+                        "WebElementReqHand");
+                }
+            }
+        });
     },
 
     _getSelectedCommand = function(req, res) {

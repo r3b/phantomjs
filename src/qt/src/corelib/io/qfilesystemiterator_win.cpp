@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
+** Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of the QtCore module of the Qt Toolkit.
@@ -51,7 +51,6 @@
 #include <QtCore/qt_windows.h>
 
 QT_BEGIN_NAMESPACE
-#ifndef  QT_NO_FILESYSTEMITERATOR
 
 bool done = true;
 
@@ -148,5 +147,4 @@ bool QFileSystemIterator::advance(QFileSystemEntry &fileEntry, QFileSystemMetaDa
     return false;
 }
 
-#endif //  QT_NO_FILESYSTEMITERATOR
 QT_END_NAMESPACE

@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
+** Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of the QtCore module of the Qt Toolkit.
@@ -106,8 +106,6 @@ QT_END_NAMESPACE
 #include <stdlib.h>
 #include <string.h>
 #ifdef Q_OS_QNX
-#include "qvarlengtharray.h"
-
 #include <spawn.h>
 #include <sys/neutrino.h>
 #endif
@@ -326,18 +324,16 @@ void QProcessManager::unlock()
     mutex.unlock();
 }
 
-static int qt_create_pipe(int *pipe)
+static void qt_create_pipe(int *pipe)
 {
     if (pipe[0] != -1)
         qt_safe_close(pipe[0]);
     if (pipe[1] != -1)
         qt_safe_close(pipe[1]);
-    int pipe_ret = qt_safe_pipe(pipe);
-    if (pipe_ret != 0) {
+    if (qt_safe_pipe(pipe) != 0) {
         qWarning("QProcessPrivate::createPipe: Cannot create pipe %p: %s",
                  pipe, qPrintable(qt_error_string(errno)));
     }
-    return pipe_ret;
 }
 
 void QProcessPrivate::destroyPipe(int *pipe)
@@ -369,8 +365,7 @@ bool QProcessPrivate::createChannel(Channel &channel)
 
     if (channel.type == Channel::Normal) {
         // we're piping this channel to our own process
-        if (qt_create_pipe(channel.pipe) != 0)
-            return false;
+        qt_create_pipe(channel.pipe);
 
         // create the socket notifiers
         if (threadData->eventDispatcher) {
@@ -454,8 +449,7 @@ bool QProcessPrivate::createChannel(Channel &channel)
             Q_ASSERT(sink->pipe[0] == INVALID_Q_PIPE && sink->pipe[1] == INVALID_Q_PIPE);
 
             Q_PIPE pipe[2] = { -1, -1 };
-            if (qt_create_pipe(pipe) != 0)
-                return false;
+            qt_create_pipe(pipe);
             sink->pipe[0] = pipe[0];
             source->pipe[1] = pipe[1];
 
@@ -549,15 +543,10 @@ void QProcessPrivate::startProcess()
     // Initialize pipes
     if (!createChannel(stdinChannel) ||
         !createChannel(stdoutChannel) ||
-        !createChannel(stderrChannel) ||
-        qt_create_pipe(childStartedPipe) != 0 ||
-        qt_create_pipe(deathPipe) != 0) {
-        processError = QProcess::FailedToStart;
-        q->setErrorString(qt_error_string(errno));
-        emit q->error(processError);
-        cleanup();
+        !createChannel(stderrChannel))
         return;
-    }
+    qt_create_pipe(childStartedPipe);
+    qt_create_pipe(deathPipe);
 
     if (threadData->eventDispatcher) {
         startupSocketNotifier = new QSocketNotifier(childStartedPipe[0],
@@ -877,21 +866,8 @@ static pid_t doSpawn(int fd_count, int fd_map[], char **argv, char **envp,
 
 pid_t QProcessPrivate::spawnChild(const char *workingDir, char **argv, char **envp)
 {
-    // we need to manually fill in fd_map
-    // to inherit the file descriptors from
-    // the parent
-    const int fd_count = sysconf(_SC_OPEN_MAX);
-    QVarLengthArray<int, 1024> fd_map(fd_count);
-
-    for (int i = 3; i < fd_count; ++i) {
-        // here we rely that fcntl returns -1 and
-        // sets errno to EBADF
-        const int flags = ::fcntl(i, F_GETFD);
-
-        fd_map[i] = ((flags >= 0) && !(flags & FD_CLOEXEC))
-                  ? i : SPAWN_FDCLOSED;
-    }
-
+    const int fd_count = 3;
+    int fd_map[fd_count];
     switch (processChannelMode) {
     case QProcess::ForwardedChannels:
         fd_map[0] = stdinChannel.pipe[0];
@@ -910,7 +886,7 @@ pid_t QProcessPrivate::spawnChild(const char *workingDir, char **argv, char **en
         break;
     }
 
-    pid_t childPid = doSpawn(fd_count, fd_map.data(), argv, envp, workingDir, false);
+    pid_t childPid = doSpawn(fd_count, fd_map, argv, envp, workingDir, false);
 
     if (childPid == -1) {
         QString error = qt_error_string(errno);
@@ -967,9 +943,23 @@ qint64 QProcessPrivate::readFromStderr(char *data, qint64 maxlen)
     return bytesRead;
 }
 
+static void qt_ignore_sigpipe()
+{
+    // Set to ignore SIGPIPE once only.
+    static QBasicAtomicInt atom = Q_BASIC_ATOMIC_INITIALIZER(0);
+    if (atom.testAndSetRelaxed(0, 1)) {
+        struct sigaction noaction;
+        memset(&noaction, 0, sizeof(noaction));
+        noaction.sa_handler = SIG_IGN;
+        ::sigaction(SIGPIPE, &noaction, 0);
+    }
+}
+
 qint64 QProcessPrivate::writeToStdin(const char *data, qint64 maxlen)
 {
-    qint64 written = qt_safe_write_nosignal(stdinChannel.pipe[1], data, maxlen);
+    qt_ignore_sigpipe();
+
+    qint64 written = qt_safe_write(stdinChannel.pipe[1], data, maxlen);
 #if defined QPROCESS_DEBUG
     qDebug("QProcessPrivate::writeToStdin(%p \"%s\", %lld) == %lld",
            data, qt_prettyDebug(data, maxlen, 16).constData(), maxlen, written);
@@ -1345,15 +1335,10 @@ bool QProcessPrivate::startDetached(const QString &program, const QStringList &a
 
     // To catch the startup of the child
     int startedPipe[2];
-    if (qt_safe_pipe(startedPipe) != 0)
-        return false;
+    qt_safe_pipe(startedPipe);
     // To communicate the pid of the child
     int pidPipe[2];
-    if (qt_safe_pipe(pidPipe) != 0) {
-        qt_safe_close(startedPipe[0]);
-        qt_safe_close(startedPipe[1]);
-        return false;
-    }
+    qt_safe_pipe(pidPipe);
 
     pid_t childPid = fork();
     if (childPid == 0) {

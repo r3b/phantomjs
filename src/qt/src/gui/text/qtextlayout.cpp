@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
+** Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of the QtGui module of the Qt Toolkit.
@@ -2498,14 +2498,13 @@ qreal QTextLine::cursorToX(int *cursorPos, Edge edge) const
     bool lastLine = i >= eng->lines.size() - 1;
 
     QFixed x = line.x;
-    x += eng->alignLine(line) - eng->leadingSpaceWidth(line);
+    x += eng->alignLine(line);
 
     if (!i && !eng->layoutData->items.size()) {
         *cursorPos = 0;
         return x.toReal();
     }
 
-    int lineEnd = line.from + line.length + line.trailingSpaces;
     int pos = *cursorPos;
     int itm;
     const HB_CharAttributes *attributes = eng->attributes();
@@ -2513,9 +2512,9 @@ qreal QTextLine::cursorToX(int *cursorPos, Edge edge) const
         *cursorPos = 0;
         return x.toReal();
     }
-    while (pos < lineEnd && !attributes[pos].charStop)
+    while (pos < line.from + line.length && !attributes[pos].charStop)
         pos++;
-    if (pos == lineEnd) {
+    if (pos == line.from + (int)line.length) {
         // end of line ensure we have the last item on the line
         itm = eng->findItem(pos-1);
     }
@@ -2547,6 +2546,7 @@ qreal QTextLine::cursorToX(int *cursorPos, Edge edge) const
 
     bool reverse = eng->layoutData->items[itm].analysis.bidiLevel % 2;
 
+    int lineEnd = line.from + line.length;
 
     // add the items left of the cursor
 
@@ -2618,9 +2618,6 @@ qreal QTextLine::cursorToX(int *cursorPos, Edge edge) const
 
     if (eng->option.wrapMode() != QTextOption::NoWrap && x > line.x + line.width)
         x = line.x + line.width;
-
-    if (eng->option.wrapMode() != QTextOption::NoWrap && x < 0)
-        x = 0;
 
     *cursorPos = pos + si->position;
     return x.toReal();

@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
+** Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of the QtGui module of the Qt Toolkit.
@@ -330,9 +330,8 @@ QImage QRasterPixmapData::toImage(const QRect &rect) const
         return image;
 
     QRect clipped = rect.intersected(QRect(0, 0, w, h));
-    const uint du = uint(d);
-    if ((du % 8 == 0) && (((uint(clipped.x()) * du)) % 32 == 0))
-        return QImage(image.scanLine(clipped.y()) + clipped.x() * (du / 8),
+    if (d % 8 == 0)
+        return QImage(image.scanLine(clipped.y()) + clipped.x() * (d / 8),
                       clipped.width(), clipped.height(),
                       image.bytesPerLine(), image.format());
     else

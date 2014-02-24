@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
+** Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of the QtNetwork module of the Qt Toolkit.
@@ -83,7 +83,6 @@ public:
         : protocol(QSsl::SecureProtocols),
           peerVerifyMode(QSslSocket::AutoVerifyPeer),
           peerVerifyDepth(0),
-          allowRootCertOnDemandLoading(true),
           sslOptions(QSsl::SslOptionDisableEmptyFragments
                      |QSsl::SslOptionDisableLegacyRenegotiation
                      |QSsl::SslOptionDisableCompression)
@@ -101,7 +100,6 @@ public:
     QSsl::SslProtocol protocol;
     QSslSocket::PeerVerifyMode peerVerifyMode;
     int peerVerifyDepth;
-    bool allowRootCertOnDemandLoading;
 
     QSsl::SslOptions sslOptions;
 

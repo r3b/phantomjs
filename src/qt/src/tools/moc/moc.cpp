@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
+** Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of the tools applications of the Qt Toolkit.
@@ -766,6 +766,9 @@ void Moc::parse()
 
 void Moc::generate(FILE *out)
 {
+
+    QDateTime dt = QDateTime::currentDateTime();
+    QByteArray dstr = dt.toString().toLatin1();
     QByteArray fn = filename;
     int i = filename.length()-1;
     while (i>0 && filename[i-1] != '/' && filename[i-1] != '\\')
@@ -774,7 +777,8 @@ void Moc::generate(FILE *out)
         fn = filename.mid(i);
     fprintf(out, "/****************************************************************************\n"
             "** Meta object code from reading C++ file '%s'\n**\n" , (const char*)fn);
-    fprintf(out, "** Created by: The Qt Meta Object Compiler version %d (Qt %s)\n**\n" , mocOutputRevision, QT_VERSION_STR);
+    fprintf(out, "** Created: %s\n"
+            "**      by: The Qt Meta Object Compiler version %d (Qt %s)\n**\n" , dstr.data(), mocOutputRevision, QT_VERSION_STR);
     fprintf(out, "** WARNING! All changes made in this file will be lost!\n"
             "*****************************************************************************/\n\n");
 

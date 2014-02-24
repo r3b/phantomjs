@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
+** Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of the QtGui module of the Qt Toolkit.
@@ -432,8 +432,6 @@ QGridLayoutBox QGridLayoutRowData::totalBox(int start, int end) const
         result.q_maximumSize = 0.0;
         qreal nextSpacing = 0.0;
         for (int i = start; i < end; ++i) {
-            if (ignore.testBit(i))
-                continue;
             result.add(boxes.at(i), stretches.at(i), nextSpacing);
             nextSpacing = spacings.at(i);
         }
@@ -1477,7 +1475,7 @@ void QGridLayoutEngine::fillRowData(QGridLayoutRowData *rowData, const QLayoutSt
 
                     int effectiveRowSpan = 1;
                     for (int i = 1; i < itemRowSpan; ++i) {
-                        if (!rowData->ignore.testBit(i + itemRow))
+                        if (!rowData->ignore.testBit(i))
                             ++effectiveRowSpan;
                     }
 

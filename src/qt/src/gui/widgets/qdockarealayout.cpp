@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
+** Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of the QtGui module of the Qt Toolkit.
@@ -3321,8 +3321,7 @@ void QDockAreaLayout::keepSize(QDockWidget *w)
 void QDockAreaLayout::styleChangedEvent()
 {
     sep = mainWindow->style()->pixelMetric(QStyle::PM_DockWidgetSeparatorExtent, 0, mainWindow);
-    if (isValid())
-        fitLayout();
+    fitLayout();
 }
 
 QT_END_NAMESPACE

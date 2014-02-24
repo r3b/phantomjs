@@ -56,10 +56,6 @@ page.onNavigationRequested = ->
   console.log "page.onNavigationRequested"
   printArgs.apply this, arguments_
 
-page.onRepaintRequested = ->
-  console.log "page.onRepaintRequested"
-  printArgs.apply this, arguments_
-
 if logResources is true
   page.onResourceRequested = ->
     console.log "page.onResourceRequested"

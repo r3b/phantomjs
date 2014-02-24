@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
+** Copyright (C) 2012 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of the QtCore module of the Qt Toolkit.
@@ -125,7 +125,7 @@ QEventDispatcherUNIXPrivate::QEventDispatcherUNIXPrivate()
     }
 #elif defined(Q_OS_VXWORKS)
     char name[20];
-    qsnprintf(name, sizeof(name), "/pipe/qt_%08x", int(taskIdSelf()));
+    qsnprintf(name, sizeof(name), "/pipe/qt_%08x", int(taskIdCurrent));
 
     // make sure there is no pipe with this name
     pipeDevDelete(name, true);
@@ -165,7 +165,7 @@ QEventDispatcherUNIXPrivate::~QEventDispatcherUNIXPrivate()
     close(thread_pipe[0]);
 
     char name[20];
-    qsnprintf(name, sizeof(name), "/pipe/qt_%08x", int(taskIdSelf()));
+    qsnprintf(name, sizeof(name), "/pipe/qt_%08x", int(taskIdCurrent));
 
     pipeDevDelete(name, true);
 #else
@@ -356,7 +356,8 @@ timeval QTimerInfoList::updateCurrentTime()
 
 #if ((_POSIX_MONOTONIC_CLOCK-0 <= 0) && !defined(Q_OS_MAC) && !defined(Q_OS_INTEGRITY)) || defined(QT_BOOTSTRAPPED)
 
-timeval qAbsTimeval(const timeval &t)
+template <>
+timeval qAbs(const timeval &t)
 {
     timeval tmp = t;
     if (tmp.tv_sec < 0) {
@@ -405,7 +406,7 @@ bool QTimerInfoList::timeChanged(timeval *delta)
     timeval tickGranularity;
     tickGranularity.tv_sec = 0;
     tickGranularity.tv_usec = msPerTick * 1000;
-    return elapsedTimeTicks < ((qAbsTimeval(*delta) - tickGranularity) * 10);
+    return elapsedTimeTicks < ((qAbs(*delta) - tickGranularity) * 10);
 }
 
 void QTimerInfoList::repairTimersIfNeeded()
@@ -908,7 +909,7 @@ bool QEventDispatcherUNIX::processEvents(QEventLoop::ProcessEventsFlags flags)
     QCoreApplicationPrivate::sendPostedEvents(0, 0, d->threadData);
 
     int nevents = 0;
-    const bool canWait = (d->threadData->canWaitLocked()
+    const bool canWait = (d->threadData->canWait
                           && !d->interrupt
                           && (flags & QEventLoop::WaitForMoreEvents));
 

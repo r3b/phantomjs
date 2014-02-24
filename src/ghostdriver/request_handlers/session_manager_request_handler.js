@@ -1,7 +1,7 @@
 /*
 This file is part of the GhostDriver by Ivan De Marino <http://ivandemarino.me>.
 
-Copyright (c) 2014, Ivan De Marino <http://ivandemarino.me>
+Copyright (c) 2012, Ivan De Marino <http://ivandemarino.me>
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without modification,
@@ -40,10 +40,10 @@ ghostdriver.SessionManagerReqHand = function() {
     _handle = function(req, res) {
         _protoParent.handle.call(this, req, res);
 
-        if (req.urlParsed.chunks.length === 1 && req.urlParsed.file === "session" && req.method === "POST") {
+        if (req.urlParsed.file === "session" && req.method === "POST") {
             _postNewSessionCommand(req, res);
             return;
-        } else if (req.urlParsed.chunks.length === 1 && req.urlParsed.file === "sessions" && req.method === "GET") {
+        } else if (req.urlParsed.file === "sessions" && req.method === "GET") {
             _getActiveSessionsCommand(req, res);
             return;
         } else if (req.urlParsed.directory === "/session/") {
@@ -60,8 +60,7 @@ ghostdriver.SessionManagerReqHand = function() {
 
     _postNewSessionCommand = function(req, res) {
         var newSession,
-            postObj,
-            redirectToHost;
+            postObj;
 
         try {
             postObj = JSON.parse(req.post);
@@ -77,8 +76,10 @@ ghostdriver.SessionManagerReqHand = function() {
 
             _log.info("_postNewSessionCommand", "New Session Created: " + newSession.getId());
 
-            // Return newly created Session Capabilities
-            res.success(newSession.getId(), newSession.getCapabilities());
+            // Redirect to the newly created Session
+            res.statusCode = 303; //< "303 See Other"
+            res.setHeader("Location", "http://" + req.headers.Host + "/wd/hub/session/"+newSession.getId());
+            res.closeGracefully();
             return;
         }
 
