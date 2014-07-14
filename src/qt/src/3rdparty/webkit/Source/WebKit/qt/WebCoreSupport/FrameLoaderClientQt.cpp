@@ -251,7 +251,7 @@ bool FrameLoaderClientQt::hasWebView() const
     return true;
 }
 
-void FrameLoaderClientQt::savePlatformDataToCachedFrame(CachedFrame*) 
+void FrameLoaderClientQt::savePlatformDataToCachedFrame(CachedFrame*)
 {
     notImplemented();
 }
@@ -644,7 +644,7 @@ bool FrameLoaderClientQt::canShowMIMETypeAsHTML(const String& MIMEType) const
     notImplemented();
     return false;
 }
-    
+
 bool FrameLoaderClientQt::canShowMIMEType(const String& MIMEType) const
 {
     String type = MIMEType;
@@ -899,7 +899,7 @@ void FrameLoaderClientQt::committedLoad(WebCore::DocumentLoader* loader, const c
 {
     if (!m_pluginView)
         loader->commitData(data, length);
-    
+
     // We re-check here as the plugin can have been created.
     if (m_pluginView && m_pluginView->isPluginView()) {
         if (!m_hasSentResponseToPlugin) {
@@ -1383,10 +1383,10 @@ ObjectContentType FrameLoaderClientQt::objectContentType(const KURL& url, const 
         plugInType = ObjectContentNetscapePlugin;
     else if (m_frame->page() && m_frame->page()->pluginData() && m_frame->page()->pluginData()->supportsMimeType(mimeType))
         plugInType = ObjectContentOtherPlugin;
-        
+
     if (MIMETypeRegistry::isSupportedImageMIMEType(mimeType))
         return shouldPreferPlugInsForImages && plugInType != ObjectContentNone ? plugInType : ObjectContentImage;
-    
+
     if (plugInType != ObjectContentNone)
         return plugInType;
 
@@ -1419,7 +1419,7 @@ public:
             platformWidget()->deleteLater();
     }
     virtual void invalidateRect(const IntRect& r)
-    { 
+    {
         if (platformWidget())
             platformWidget()->update(r);
     }
@@ -1617,27 +1617,14 @@ PassRefPtr<Widget> FrameLoaderClientQt::createPlugin(const IntSize& pluginSize, 
         if (mimeType == "application/x-shockwave-flash") {
             QWebPageClient* client = m_webFrame->page()->d->client.get();
             const bool isQWebView = client && qobject_cast<QWidget*>(client->pluginParent());
-#if defined(MOZ_PLATFORM_MAEMO) && (MOZ_PLATFORM_MAEMO >= 5)
             size_t wmodeIndex = params.find("wmode");
+            //Force flash embeds to use transparent mode so they can be rasterized by Phantom
             if (wmodeIndex == WTF::notFound) {
-                // Disable XEmbed mode and force it to opaque mode.
                 params.append("wmode");
-                values.append("opaque");
+                values.append("transparent");
             } else if (!isQWebView) {
-                // Disable transparency if client is not a QWebView.
-                values[wmodeIndex] = "opaque";
+                values[wmodeIndex] = "transparent";
             }
-#else
-            if (!isQWebView) {
-                // Inject wmode=opaque when there is no client or the client is not a QWebView.
-                size_t wmodeIndex = params.find("wmode");
-                if (wmodeIndex == WTF::notFound) {
-                    params.append("wmode");
-                    values.append("opaque");
-                } else if (equalIgnoringCase(values[wmodeIndex], "window"))
-                    values[wmodeIndex] = "opaque";
-            }
-#endif
         }
 
         RefPtr<PluginView> pluginView = PluginView::create(m_frame, pluginSize, element, url,
