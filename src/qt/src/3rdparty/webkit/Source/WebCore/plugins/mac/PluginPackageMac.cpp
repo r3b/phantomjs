@@ -33,7 +33,7 @@
 #include "npruntime_impl.h"
 #include "PluginDatabase.h"
 #include "PluginDebug.h"
-#include "WebCoreNSStringExtras.h"
+#include "../../platform/mac/WebCoreNSStringExtras.h"
 #include <wtf/text/CString.h>
 
 #include <CoreFoundation/CoreFoundation.h>
